@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Repuestos</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#185FA5;--blue-lt:#E6F1FB;--blue-dk:#0C447C;
+  --green:#3B6D11;--green-lt:#EAF3DE;
+  --amber:#854F0B;--amber-lt:#FAEEDA;
+  --red:#A32D2D;--red-lt:#FCEBEB;
+  --g50:#F7F7F5;--g100:#EFEFEC;--g200:#D3D1C7;--g400:#888780;--g700:#444441;--g900:#1C1C1A;
+  --border:rgba(0,0,0,.1);--border-md:rgba(0,0,0,.18);
+  --r-sm:6px;--r-md:10px;--r-lg:14px;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'SF Mono','Consolas','Courier New',monospace;
+  --sh-sm:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 16px rgba(0,0,0,.12);--sh-lg:0 8px 32px rgba(0,0,0,.2);
+}
+body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:100vh;font-size:15px}
+
+/* ?? TOPBAR ?? */
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 1.25rem;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;box-shadow:var(--sh-sm)}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;flex-shrink:0}
+.logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.topbar-search{flex:1;max-width:380px;position:relative}
+.topbar-search input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border-md);border-radius:var(--r-md);font-size:14px;background:var(--g50);color:var(--g900);font-family:var(--font)}
+.topbar-search input:focus{outline:none;border-color:var(--blue);background:white}
+.search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--g400);pointer-events:none}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.admin-badge{font-size:11px;background:#FFF3CD;color:#856404;border:1px solid #FFEAA7;padding:4px 10px;border-radius:99px;font-weight:600;display:none}
+.btn{border:1px solid var(--border-md);background:white;color:var(--g900);padding:7px 14px;border-radius:var(--r-md);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:var(--font);font-weight:500;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--g50)}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-dk)}
+.btn-danger{background:var(--red);color:white;border-color:var(--red)}
+.btn-danger:hover{background:#7a1f1f}
+.btn-warning{background:#856404;color:white;border-color:#856404}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* ?? LAYOUT ?? */
+.layout{display:flex;min-height:calc(100vh - 58px)}
+.sidebar{width:240px;background:white;border-right:1px solid var(--border);padding:1.25rem 1rem;flex-shrink:0;display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.sidebar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);margin-bottom:6px}
+.sidebar select{width:100%;padding:8px 10px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:13px;background:var(--g50);color:var(--g900);font-family:var(--font)}
+.cat-list{display:flex;flex-direction:column;gap:2px}
+.cat-item{padding:7px 10px;border-radius:var(--r-sm);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--g700);transition:background .12s;user-select:none}
+.cat-item:hover{background:var(--g100)}
+.cat-item.active{background:var(--blue-lt);color:var(--blue);font-weight:600}
+.cat-badge{background:var(--g100);border-radius:99px;padding:1px 7px;font-size:11px;color:var(--g400)}
+.cat-item.active .cat-badge{background:white;color:var(--blue)}
+
+/* ?? CONTENT ?? */
+.content{flex:1;padding:1.25rem;overflow:auto;min-width:0}
+.content-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.count-label{font-size:13px;color:var(--g400);flex:1}
+
+/* ?? GRID ?? */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.card{background:white;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .2s;box-shadow:var(--sh-sm)}
+.card:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
+.card-img{width:100%;height:150px;background:var(--g100);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-img-gallery{display:flex;height:150px;gap:2px}
+.card-img-main{flex:2;background:var(--g100);overflow:hidden}
+.card-img-main img{width:100%;height:100%;object-fit:cover}
+.card-img-thumbs{flex:1;display:flex;flex-direction:column;gap:2px}
+.card-img-thumb{flex:1;background:var(--g50);overflow:hidden}
+.card-img-thumb img{width:100%;height:100%;object-fit:cover}
+.img-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--g400)}
+.img-ph svg{width:32px;height:32px;opacity:.3;stroke:var(--g400);fill:none;stroke-width:1.5;stroke-linecap:round}
+.card-body{padding:14px}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.card-name{font-size:14px;font-weight:600;line-height:1.4;flex:1}
+.part-tag{font-size:10px;font-family:var(--mono);background:var(--blue-lt);color:var(--blue-dk);padding:2px 7px;border-radius:4px;flex-shrink:0;font-weight:600}
+.card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.card-cat{font-size:11px;color:var(--g400)}
+.wh-tag{font-size:10px;font-family:var(--mono);background:var(--green-lt);color:var(--green);padding:2px 7px;border-radius:4px;font-weight:600}
+.card-desc{font-size:12px;color:var(--g400);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.chip{font-size:11px;background:var(--g100);border:1px solid var(--border);padding:2px 8px;border-radius:99px;color:var(--g700)}
+.card-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px}
+.stock-ok{background:var(--green-lt);color:var(--green);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.stock-low{background:var(--amber-lt);color:var(--amber);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.stock-out{background:var(--red-lt);color:var(--red);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.card-price{font-size:15px;font-weight:700}
+.empty-state{grid-column:1/-1;text-align:center;padding:4rem 1rem;color:var(--g400)}
+.empty-state svg{width:48px;height:48px;margin-bottom:12px;opacity:.3;stroke:var(--g400);fill:none;stroke-width:1.5;stroke-linecap:round}
+
+/* ?? LOADING ?? */
+.loading-screen{position:fixed;inset:0;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+.spinner{width:40px;height:40px;border:3px solid var(--g100);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--g400)}
+
+/* ?? TOAST ?? */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:white;padding:10px 20px;border-radius:var(--r-md);font-size:13px;z-index:999;transition:transform .3s;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ?? OVERLAY / MODAL ?? */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:var(--r-lg);width:100%;max-width:820px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh-lg);transform:translateY(12px);transition:transform .2s}
+.overlay.open .modal{transform:translateY(0)}
+.modal-hdr{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:white;z-index:5}
+.modal-hdr-title{font-size:16px;font-weight:700}
+.modal-hdr-sub{font-size:12px;color:var(--g400);margin-top:2px}
+.modal-close{border:none;background:var(--g100);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--g700);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:12px}
+.modal-close:hover{background:var(--g200)}
+
+/* ?? DETAIL MODAL ?? */
+.detail-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.gallery{display:flex;flex-direction:column;gap:10px}
+.gallery-main{width:100%;aspect-ratio:4/3;background:var(--g100);border-radius:var(--r-md);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+.gallery-main img{width:100%;height:100%;object-fit:cover}
+.gallery-thumbs{display:flex;gap:8px}
+.g-thumb{width:68px;height:68px;border-radius:var(--r-sm);border:2px solid transparent;overflow:hidden;cursor:pointer;background:var(--g100);flex-shrink:0}
+.g-thumb.active{border-color:var(--blue)}
+.g-thumb img{width:100%;height:100%;object-fit:cover}
+.info-col{display:flex;flex-direction:column;gap:1rem}
+.info-card{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+.info-card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g400);padding:10px 14px;background:var(--g50);border-bottom:1px solid var(--border)}
+.info-rows{padding:4px 14px}
+.info-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-lbl{color:var(--g400);flex-shrink:0}
+.info-val{font-weight:600;text-align:right;word-break:break-word}
+.info-val.mono{font-family:var(--mono);color:var(--blue);font-size:12px}
+.info-val.wh{font-family:var(--mono);background:var(--green-lt);color:var(--green);padding:2px 8px;border-radius:4px;font-size:12px}
+.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px}
+.spec-box{background:var(--g50);border-radius:var(--r-sm);padding:8px 10px}
+.spec-box-lbl{font-size:10px;color:var(--g400);margin-bottom:2px}
+.spec-box-val{font-size:13px;font-weight:600}
+.desc-text{font-size:13px;line-height:1.7;color:var(--g700);padding:12px 14px}
+.modal-ftr{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* ?? FORM MODAL ?? */
+.form-body{padding:1.5rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:12px;font-weight:600;color:var(--g700)}
+.fg input,.fg select,.fg textarea{padding:9px 11px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:13px;background:var(--g50);color:var(--g900);font-family:var(--font);width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);background:white}
+.fg .mono-input{font-family:var(--mono)}
+.fg textarea{resize:vertical;min-height:80px}
+.photo-row{display:flex;gap:10px;flex-wrap:wrap}
+.ph-slot{width:88px;height:88px;border-radius:var(--r-md);border:2px dashed var(--border-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--g400);cursor:pointer;position:relative;overflow:hidden;background:var(--g50);transition:border-color .15s,background .15s}
+.ph-slot:hover{border-color:var(--blue);background:var(--blue-lt)}
+.ph-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph-slot .ph-remove{position:absolute;top:4px;right:4px;background:var(--red);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2}
+.ph-slot:hover .ph-remove{display:flex}
+.ph-plus{font-size:24px;opacity:.4;line-height:1}
+
+/* ?? LOGIN MODAL ?? */
+.login-box{background:white;border-radius:var(--r-lg);width:100%;max-width:360px;padding:2rem;box-shadow:var(--sh-lg);display:flex;flex-direction:column;gap:1.25rem;transform:translateY(12px);transition:transform .2s}
+.overlay.open .login-box{transform:translateY(0)}
+.login-title{font-size:18px;font-weight:700;text-align:center}
+.login-sub{font-size:13px;color:var(--g400);text-align:center}
+.login-input{padding:10px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:14px;font-family:var(--font);width:100%}
+.login-input:focus{outline:none;border-color:var(--blue)}
+.login-error{font-size:12px;color:var(--red);text-align:center;display:none}
+
+/* ?? CONFIG BANNER ?? */
+.config-banner{background:#FFF3CD;border-bottom:1px solid #FFEAA7;padding:10px 1.25rem;display:flex;align-items:center;gap:10px;font-size:13px;color:#856404}
+.config-banner strong{font-weight:700}
+.config-banner a{color:var(--blue);text-decoration:underline;cursor:pointer}
+
+/* ?? MOBILE ?? */
+.mob-filter-bar{display:none;padding:10px 1rem;background:white;border-bottom:1px solid var(--border);gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mob-chip{flex-shrink:0;padding:6px 14px;border-radius:99px;border:1px solid var(--border-md);font-size:13px;cursor:pointer;background:white;color:var(--g700);white-space:nowrap;transition:background .12s}
+.mob-chip.active{background:var(--blue);color:white;border-color:var(--blue)}
+.mob-fab{display:none;position:fixed;bottom:20px;right:20px;width:52px;height:52px;background:var(--blue);color:white;border:none;border-radius:50%;font-size:24px;cursor:pointer;box-shadow:var(--sh-lg);align-items:center;justify-content:center;z-index:40;transition:background .15s,transform .15s}
+.mob-fab:hover{background:var(--blue-dk);transform:scale(1.05)}
+
+@media(max-width:768px){
+  .topbar{padding:0 1rem}
+  .topbar-search{max-width:none;flex:1}
+  .topbar-search input{font-size:16px}
+  .topbar .btn-primary{display:none}
+  .sidebar{display:none}
+  .mob-fab{display:flex}
+  .mob-filter-bar{display:flex}
+  .content{padding:1rem}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .card-img,.card-img-gallery{height:120px}
+  .detail-body{grid-template-columns:1fr}
+  .modal-ftr .btn{flex:1;justify-content:center}
+  .form-grid{grid-template-columns:1fr}
+  .fg.full{grid-column:1}
+  .modal{border-radius:var(--r-lg) var(--r-lg) 0 0;max-height:95vh}
+  .overlay{align-items:flex-end;padding:0}
+}
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr}
+  .card-body{padding:10px}
+  .card-chips{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando catálogo...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CONFIG BANNER (visible until Firebase is configured) -->
+<div class="config-banner" id="configBanner" style="display:none">
+  ?? <strong>Configuración pendiente:</strong> Ingresa tus credenciales de Firebase en el código.
+  <a onclick="openHelp()">Ver instrucciones</a>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+    </div>
+    <span>Catálogo de Repuestos</span>
+  </div>
+  <div class="topbar-search">
+    <span class="search-ico">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input id="searchInput" type="search" placeholder="Buscar por nombre, N° parte, código almacén..." oninput="filterParts()">
+  </div>
+  <div class="topbar-right">
+    <span class="admin-badge" id="adminBadge">?? Administrador</span>
+    <button class="btn btn-primary" id="btnAdd" onclick="openForm()" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar
+    </button>
+    <button class="btn" id="btnLogin" onclick="openLogin()">?? Admin</button>
+    <button class="btn btn-warning btn-sm" id="btnLogout" onclick="doLogout()" style="display:none">Salir</button>
+  </div>
+</div>
+
+<!-- MOBILE FILTER BAR -->
+<div class="mob-filter-bar" id="mobFilterBar"></div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-label">Ordenar por</div>
+      <select id="sortSelect" onchange="filterParts()">
+        <option value="name">Nombre A-Z</option>
+        <option value="part">N° de parte</option>
+        <option value="warehouse">Código almacén</option>
+        <option value="stock-desc">Mayor stock</option>
+        <option value="price-asc">Menor precio</option>
+        <option value="price-desc">Mayor precio</option>
+      </select>
+    </div>
+    <div>
+      <div class="sidebar-label">Categoría</div>
+      <div class="cat-list" id="catList"></div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="content-header">
+      <span class="count-label" id="countLabel"></span>
+    </div>
+    <div class="grid" id="partsGrid"></div>
+  </div>
+</div>
+
+<!-- FAB MOBILE (solo admin) -->
+<button class="mob-fab" id="mobFab" onclick="openForm()" style="display:none">+</button>
+
+<!-- ?? DETAIL MODAL ?? -->
+<div class="overlay" id="detailOverlay" onclick="closeDetailIfBg(event)">
+<div class="modal">
+  <div class="modal-hdr">
+    <div>
+      <div class="modal-hdr-title" id="dm-name"></div>
+      <div class="modal-hdr-sub" id="dm-cat"></div>
+    </div>
+    <button class="modal-close" onclick="closeDetail()">?</button>
+  </div>
+  <div class="detail-body">
+    <div class="gallery">
+      <div class="gallery-main">
+        <div class="img-ph" id="dm-ph"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:12px">Sin imagen</span></div>
+        <img id="dm-main-img" style="display:none;width:100%;height:100%;object-fit:cover">
+      </div>
+      <div class="gallery-thumbs" id="dm-thumbs"></div>
+    </div>
+    <div class="info-col">
+      <div class="info-card">
+        <div class="info-card-title">Identificación</div>
+        <div class="info-rows">
+          <div class="info-row"><span class="info-lbl">N° de parte</span><span class="info-val mono" id="dm-part"></span></div>
+          <div class="info-row"><span class="info-lbl">Código almacén</span><span class="info-val"><span class="wh" id="dm-wh"></span></span></div>
+          <div class="info-row"><span class="info-lbl">Marca / Fabricante</span><span class="info-val" id="dm-brand"></span></div>
+          <div class="info-row"><span class="info-lbl">Compatibilidad</span><span class="info-val" id="dm-compat"></span></div>
+          <div class="info-row"><span class="info-lbl">Stock</span><span class="info-val" id="dm-stock"></span></div>
+          <div class="info-row"><span class="info-lbl">Precio unitario</span><span class="info-val" id="dm-price"></span></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Especificaciones técnicas</div>
+        <div class="specs-grid" id="dm-specs"></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Descripción</div>
+        <div class="desc-text" id="dm-desc"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-ftr" id="dm-ftr">
+    <button class="btn btn-danger" id="dm-del" onclick="deleteCurrentPart()" style="display:none">Eliminar</button>
+    <button class="btn" id="dm-edit" onclick="editCurrentPart()" style="display:none">Editar</button>
+    <button class="btn btn-primary" onclick="closeDetail()">Cerrar</button>
+  </div>
+</div>
+</div>
+
+<!-- ?? FORM MODAL ?? -->
+<div class="overlay" id="formOverlay" onclick="closeFormIfBg(event)">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-hdr-title" id="fm-title">Nuevo repuesto</div>
+    <button class="modal-close" onclick="closeForm()">?</button>
+  </div>
+  <div class="form-body">
+    <div class="form-grid">
+      <div class="fg"><label>Nombre del repuesto *</label><input id="f-name" placeholder="Ej: Rodamiento de bolas 6205"></div>
+      <div class="fg"><label>N° de parte *</label><input id="f-part" class="mono-input" placeholder="Ej: RB-6205-2RS"></div>
+      <div class="fg"><label>Código almacén</label><input id="f-wh" class="mono-input" placeholder="Ej: ALM-A3-EST2-C4"></div>
+      <div class="fg"><label>Categoría</label><input id="f-cat" placeholder="Ej: Rodamientos, Hidráulica..."></div>
+      <div class="fg"><label>Marca / Fabricante</label><input id="f-brand" placeholder="Ej: SKF, Bosch, Parker..."></div>
+      <div class="fg"><label>Compatibilidad</label><input id="f-compat" placeholder="Ej: Torno CNC-450, Fresadora X3"></div>
+      <div class="fg"><label>Stock disponible</label><input id="f-stock" type="number" min="0" placeholder="0"></div>
+      <div class="fg"><label>Precio unitario (USD)</label><input id="f-price" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fg full"><label>Descripción</label><textarea id="f-desc" placeholder="Descripción general, aplicación, notas importantes..."></textarea></div>
+      <div class="fg full"><label>Características técnicas <span style="font-weight:400;color:var(--g400)">(clave: valor, separadas por coma)</span></label><input id="f-specs" placeholder="Ej: Diámetro: 25mm, Material: Acero, Temp. máx: 120°C"></div>
+      <div class="fg full">
+        <label>Fotos <span style="font-weight:400;color:var(--g400)">(máx. 3 — máx. 2MB por foto)</span></label>
+        <div class="photo-row">
+          <div class="ph-slot" id="ps-0" onclick="pickPhoto(0)"><span class="ph-plus">+</span><span>Foto 1</span><img id="pp-0" style="display:none"><button class="ph-remove" onclick="rmPhoto(event,0)">?</button></div>
+          <div class="ph-slot" id="ps-1" onclick="pickPhoto(1)"><span class="ph-plus">+</span><span>Foto 2</span><img id="pp-1" style="display:none"><button class="ph-remove" onclick="rmPhoto(event,1)">?</button></div>
+          <div class="ph-slot" id="ps-2" onclick="pickPhoto(2)"><span class="ph-plus">+</span><span>Foto 3</span><img id="pp-2" style="display:none"><button class="ph-remove" onclick="rmPhoto(event,2)">?</button></div>
+        </div>
+        <input type="file" accept="image/*" id="fi-0" style="display:none" onchange="loadPhoto(event,0)">
+        <input type="file" accept="image/*" id="fi-1" style="display:none" onchange="loadPhoto(event,1)">
+        <input type="file" accept="image/*" id="fi-2" style="display:none" onchange="loadPhoto(event,2)">
+        <div style="font-size:11px;color:var(--g400);margin-top:6px">Las fotos se guardan automáticamente en la nube.</div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-ftr">
+    <button class="btn" onclick="closeForm()">Cancelar</button>
+    <button class="btn btn-primary" id="btnSave" onclick="savePart()">Guardar repuesto</button>
+  </div>
+</div>
+</div>
+
+<!-- ?? LOGIN MODAL ?? -->
+<div class="overlay" id="loginOverlay" onclick="closeLoginIfBg(event)">
+<div class="login-box">
+  <div style="text-align:center;font-size:36px">??</div>
+  <div class="login-title">Acceso Administrador</div>
+  <div class="login-sub">Ingresa tus credenciales para editar el catálogo</div>
+  <div class="fg">
+    <label>Correo electrónico</label>
+    <input class="login-input" id="l-email" type="email" placeholder="admin@empresa.com" onkeydown="loginEnter(event)">
+  </div>
+  <div class="fg">
+    <label>Contraseña</label>
+    <input class="login-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="loginEnter(event)">
+  </div>
+  <div class="login-error" id="login-error">Correo o contraseña incorrectos.</div>
+  <button class="btn btn-primary" style="justify-content:center;padding:10px" onclick="doLogin()">Ingresar</button>
+  <button class="btn" style="justify-content:center" onclick="closeLogin()">Cancelar</button>
+</div>
+</div>
+
+<!-- ?? HELP MODAL ?? -->
+<div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
+<div class="modal" style="max-width:640px">
+  <div class="modal-hdr">
+    <div class="modal-hdr-title">?? Instrucciones de configuración Firebase</div>
+    <button class="modal-close" onclick="closeHelp()">?</button>
+  </div>
+  <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;font-size:14px;line-height:1.7">
+    <div style="background:var(--blue-lt);border-radius:var(--r-md);padding:1rem;color:var(--blue-dk)">
+      Solo necesitas seguir estos pasos <strong>una única vez</strong>. Toma aproximadamente 10 minutos.
+    </div>
+    <div>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 1 — Crear proyecto Firebase</strong>
+      <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
+        <li>Ve a <strong>console.firebase.google.com</strong> e inicia sesión con tu cuenta Google.</li>
+        <li>Haz clic en <strong>"Agregar proyecto"</strong>, ponle un nombre (ej: <em>catalogo-repuestos</em>).</li>
+        <li>Desactiva Google Analytics si no lo necesitas. Haz clic en <strong>"Crear proyecto"</strong>.</li>
+      </ol>
+    </div>
+    <div>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 2 — Obtener credenciales</strong>
+      <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
+        <li>En la consola del proyecto, haz clic en el ícono <strong>"&lt;/&gt;"</strong> (Web app).</li>
+        <li>Registra la app con cualquier nombre. NO actives Firebase Hosting.</li>
+        <li>Copia el bloque <code style="background:var(--g100);padding:2px 6px;border-radius:4px">firebaseConfig = { ... }</code> que aparece.</li>
+        <li>Abre este archivo HTML en un editor de texto y reemplaza la sección <strong>CONFIGURACIÓN FIREBASE</strong> con tus datos.</li>
+      </ol>
+    </div>
+    <div>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 3 — Activar Firestore (base de datos)</strong>
+      <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
+        <li>En el menú izquierdo ve a <strong>Firestore Database</strong>.</li>
+        <li>Clic en <strong>"Crear base de datos"</strong> ? elige <strong>Modo de producción</strong>.</li>
+        <li>Selecciona la región más cercana (ej: <em>us-central1</em>) y crea.</li>
+        <li>Ve a la pestaña <strong>Reglas</strong> y pega esto: <code style="background:var(--g100);padding:2px 6px;border-radius:4px">allow read: if true; allow write: if request.auth != null;</code></li>
+      </ol>
+    </div>
+    <div>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 4 — Crear cuenta de administrador</strong>
+      <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
+        <li>En el menú ve a <strong>Authentication</strong> ? <strong>"Comenzar"</strong>.</li>
+        <li>Activa el proveedor <strong>"Correo electrónico/Contraseña"</strong>.</li>
+        <li>Ve a la pestaña <strong>Usuarios</strong> ? <strong>"Agregar usuario"</strong>.</li>
+        <li>Ingresa el correo y contraseña del administrador. ¡Listo!</li>
+      </ol>
+    </div>
+    <div style="background:#EAF3DE;border-radius:var(--r-md);padding:1rem;color:var(--green)">
+      ? Una vez configurado, sube el archivo HTML a tu servidor interno y comparte la URL con tu equipo.
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn btn-primary" onclick="closeHelp()">Entendido</button></div>
+</div>
+</div>
+
+<script>
+// ??????????????????????????????????????????????????????????
+//  ???  CONFIGURACIÓN FIREBASE — REEMPLAZAR CON TUS DATOS ???
+// ??????????????????????????????????????????????????????????
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyChlKvDbYMme1vtXtAQM-ZsbNFxdElux7c",
+  authDomain: "catalogo-de-repuestos.firebaseapp.com",
+  projectId: "catalogo-de-repuestos",
+  storageBucket: "catalogo-de-repuestos.firebasestorage.app",
+  messagingSenderId: "548172487085",
+  appId: "1:548172487085:web:516511e75f09e011b8a924",
+  measurementId: "G-8WHBKDK432"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+// ??????????????????????????????????????????????????????????
+//  ???  FIN DE CONFIGURACIÓN  ???
+// ??????????????????????????????????????????????????????????
+
+// ?? ESTADO ??
+let parts=[], currentCat="Todas", currentDetailId=null, editMode=false, editId=null, fPhotos=[null,null,null], isAdmin=false, db=null, auth=null, configured=false;
+
+// ?? INIT FIREBASE ??
+function initFirebase(){
+  try{
+    if(firebaseConfig.apiKey==="TU_API_KEY"){
+      configured=false;
+      document.getElementById("configBanner").style.display="flex";
+      document.getElementById("loadingScreen").style.display="none";
+      loadDemoData();
+      return;
+    }
+    firebase.initializeApp(firebaseConfig);
+    db=firebase.firestore();
+    auth=firebase.auth();
+    configured=true;
+    auth.onAuthStateChanged(user=>{
+      isAdmin=!!user;
+      updateAdminUI();
+    });
+    listenParts();
+  }catch(e){
+    console.error(e);
+    document.getElementById("loadingScreen").style.display="none";
+    loadDemoData();
+  }
+}
+
+function listenParts(){
+  db.collection("repuestos").orderBy("name").onSnapshot(snap=>{
+    parts=snap.docs.map(d=>({id:d.id,...d.data()}));
+    filterParts();
+    document.getElementById("loadingScreen").style.display="none";
+  },err=>{
+    console.error(err);
+    document.getElementById("loadingScreen").style.display="none";
+    showToast("Error al cargar datos. Verifica la configuración.");
+  });
+}
+
+function loadDemoData(){
+  parts=[
+    {id:"demo1",name:"Rodamiento de bolas 6205",partNum:"RB-6205-2RS",warehouse:"ALM-B2-EST3-C1",category:"Rodamientos",brand:"SKF",compat:"Torno CNC-450, Fresadora FX-3",stock:12,price:18.50,desc:"Rodamiento rígido de bolas con sellos de goma en ambos lados. Alta resistencia a la contaminación y lubricación permanente.",specs:"Diámetro interior: 25mm, Diámetro exterior: 52mm, Ancho: 15mm, Velocidad máx: 13000 rpm",photos:[]},
+    {id:"demo2",name:"Sello hidráulico de pistón 80mm",partNum:"SH-P80-NBR",warehouse:"ALM-A1-EST1-C3",category:"Hidráulica",brand:"Parker",compat:"Cilindro hidráulico H-200",stock:3,price:42.00,desc:"Sello de poliuretano de alta resistencia para pistones hidráulicos.",specs:"Diámetro: 80mm, Material: NBR/PU, Presión máx: 400 bar",photos:[]},
+    {id:"demo3",name:"Correa trapezoidal A-55",partNum:"CT-A55-3V",warehouse:"ALM-C4-EST2-C2",category:"Transmisión",brand:"Gates",compat:"Compresora C-100, Bomba B-220",stock:0,price:8.75,desc:"Correa en V clásica perfil A de alta flexibilidad.",specs:"Perfil: A, Longitud: 1400mm, Ancho: 13mm",photos:[]},
+    {id:"demo4",name:"Válvula solenoide 24VDC ½\"",partNum:"VS-24DC-12-NC",warehouse:"ALM-A2-EST4-C5",category:"Neumática",brand:"SMC",compat:"Sistema neumático P-300",stock:7,price:95.00,desc:"Válvula de control direccional 5/2 normalmente cerrada. Bobina de 24VDC.",specs:"Voltaje: 24VDC, Conexión: ½\", Presión: 0.15-1.0 MPa",photos:[]},
+    {id:"demo5",name:"Filtro de aceite hidráulico 10µm",partNum:"FO-HYD-10-P",warehouse:"ALM-B3-EST1-C8",category:"Filtración",brand:"Hydac",compat:"Unidad hidráulica UH-500",stock:20,price:35.00,desc:"Elemento filtrante de alta eficiencia para aceites hidráulicos.",specs:"Grado: 10µm, Caudal máx: 100 L/min, Presión colapso: 210 bar",photos:[]},
+  ];
+  filterParts();
+}
+
+// ?? ADMIN UI ??
+function updateAdminUI(){
+  document.getElementById("adminBadge").style.display=isAdmin?"flex":"none";
+  document.getElementById("btnAdd").style.display=isAdmin?"flex":"none";
+  document.getElementById("btnLogin").style.display=isAdmin?"none":"flex";
+  document.getElementById("btnLogout").style.display=isAdmin?"flex":"none";
+  const mob=document.getElementById("mobFab");
+  if(mob) mob.style.display=isAdmin&&window.innerWidth<=768?"flex":"none";
+  document.getElementById("dm-del").style.display=isAdmin?"flex":"none";
+  document.getElementById("dm-edit").style.display=isAdmin?"flex":"none";
+}
+
+// ?? AUTH ??
+function openLogin(){ openOverlay("loginOverlay"); setTimeout(()=>document.getElementById("l-email").focus(),300); }
+function closeLogin(){ closeOverlay("loginOverlay"); }
+function closeLoginIfBg(e){ if(e.target===document.getElementById("loginOverlay"))closeLogin(); }
+function loginEnter(e){ if(e.key==="Enter")doLogin(); }
+async function doLogin(){
+  const email=document.getElementById("l-email").value.trim();
+  const pass=document.getElementById("l-pass").value;
+  const errEl=document.getElementById("login-error");
+  errEl.style.display="none";
+  if(!email||!pass){errEl.textContent="Completa todos los campos.";errEl.style.display="block";return;}
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    closeLogin();
+    showToast("? Sesión iniciada correctamente");
+    document.getElementById("l-pass").value="";
+  }catch(e){
+    errEl.textContent="Correo o contraseña incorrectos.";
+    errEl.style.display="block";
+  }
+}
+async function doLogout(){
+  await auth.signOut();
+  showToast("Sesión cerrada");
+}
+
+// ?? RENDER ??
+function stockInfo(s){ return s===0?{label:"Sin stock",cls:"stock-out"}:s<=5?{label:`Bajo (${s})`,cls:"stock-low"}:{label:`En stock (${s})`,cls:"stock-ok"}; }
+
+function buildCats(){
+  const cats=["Todas",...new Set(parts.map(p=>p.category).filter(Boolean))];
+  document.getElementById("catList").innerHTML=cats.map(c=>{
+    const n=c==="Todas"?parts.length:parts.filter(p=>p.category===c).length;
+    return`<div class="cat-item${c===currentCat?" active":""}" onclick="setCat('${c}')">${c}<span class="cat-badge">${n}</span></div>`;
+  }).join("");
+  document.getElementById("mobFilterBar").innerHTML=cats.map(c=>
+    `<div class="mob-chip${c===currentCat?" active":""}" onclick="setCat('${c}')">${c}</div>`
+  ).join("");
+}
+function setCat(c){ currentCat=c; filterParts(); }
+
+function filterParts(){
+  const q=(document.getElementById("searchInput").value||"").toLowerCase();
+  const sort=document.getElementById("sortSelect").value;
+  let list=parts.filter(p=>{
+    const inCat=currentCat==="Todas"||p.category===currentCat;
+    const match=!q||[p.name,p.partNum,p.brand,p.warehouse||"",p.desc||""].some(f=>f.toLowerCase().includes(q));
+    return inCat&&match;
+  });
+  const sorts={name:(a,b)=>a.name.localeCompare(b.name),part:(a,b)=>a.partNum.localeCompare(b.partNum),warehouse:(a,b)=>(a.warehouse||"").localeCompare(b.warehouse||""),"stock-desc":(a,b)=>b.stock-a.stock,"price-asc":(a,b)=>a.price-b.price,"price-desc":(a,b)=>b.price-a.price};
+  if(sorts[sort]) list.sort(sorts[sort]);
+  renderGrid(list);
+  buildCats();
+  document.getElementById("countLabel").textContent=`${list.length} repuesto${list.length!==1?"s":""}`;
+}
+
+function cardImg(photos){
+  const v=(photos||[]).filter(Boolean);
+  if(!v.length)return`<div class="card-img"><div class="img-ph"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>`;
+  if(v.length===1)return`<div class="card-img"><img src="${v[0]}" loading="lazy"></div>`;
+  return`<div class="card-img-gallery"><div class="card-img-main"><img src="${v[0]}" loading="lazy"></div><div class="card-img-thumbs">${v.slice(1).map(ph=>`<div class="card-img-thumb"><img src="${ph}" loading="lazy"></div>`).join("")}</div></div>`;
+}
+
+function renderGrid(list){
+  const g=document.getElementById("partsGrid");
+  if(!list.length){g.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>No se encontraron repuestos</p></div>`;return;}
+  g.innerHTML=list.map(p=>{
+    const st=stockInfo(p.stock||0);
+    const chips=(p.specs||"").split(",").slice(0,3).map(s=>`<span class="chip">${s.trim()}</span>`).join("");
+    const wh=p.warehouse?`<span class="wh-tag">${p.warehouse}</span>`:"";
+    return`<div class="card" onclick="openDetail('${p.id}')">
+      ${cardImg(p.photos)}
+      <div class="card-body">
+        <div class="card-header"><div class="card-name">${p.name}</div><span class="part-tag">${p.partNum||""}</span></div>
+        <div class="card-meta"><span class="card-cat">${p.category||""} · ${p.brand||""}</span>${wh}</div>
+        <div class="card-desc">${p.desc||"Sin descripción."}</div>
+        <div class="card-chips">${chips}</div>
+        <div class="card-footer"><span class="${st.cls}">${st.label}</span><span class="card-price">$${Number(p.price||0).toFixed(2)}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ?? DETAIL ??
+function openDetail(id){
+  const p=parts.find(x=>x.id===id); if(!p)return;
+  currentDetailId=id;
+  document.getElementById("dm-name").textContent=p.name;
+  document.getElementById("dm-cat").textContent=p.category||"";
+  document.getElementById("dm-part").textContent=p.partNum||"—";
+  document.getElementById("dm-wh").textContent=p.warehouse||"—";
+  document.getElementById("dm-brand").textContent=p.brand||"—";
+  document.getElementById("dm-compat").textContent=p.compat||"—";
+  const st=stockInfo(p.stock||0);
+  document.getElementById("dm-stock").innerHTML=`<span class="${st.cls}">${st.label}</span>`;
+  document.getElementById("dm-price").textContent=`$${Number(p.price||0).toFixed(2)} USD`;
+  document.getElementById("dm-desc").textContent=p.desc||"Sin descripción.";
+  document.getElementById("dm-specs").innerHTML=(p.specs||"").split(",").map(s=>{
+    const idx=s.indexOf(":"); const k=idx>=0?s.slice(0,idx).trim():s.trim(); const v=idx>=0?s.slice(idx+1).trim():"";
+    return`<div class="spec-box"><div class="spec-box-lbl">${k}</div><div class="spec-box-val">${v||"—"}</div></div>`;
+  }).join("");
+  const vp=(p.photos||[]).filter(Boolean);
+  const mi=document.getElementById("dm-main-img"),mph=document.getElementById("dm-ph");
+  if(vp.length){mi.src=vp[0];mi.style.display="block";mph.style.display="none";}
+  else{mi.style.display="none";mph.style.display="flex";}
+  document.getElementById("dm-thumbs").innerHTML=vp.map((ph,i)=>`<div class="g-thumb${i===0?" active":""}" onclick="setMain(this,'${ph}')"><img src="${ph}" loading="lazy"></div>`).join("");
+  document.getElementById("dm-del").style.display=isAdmin?"flex":"none";
+  document.getElementById("dm-edit").style.display=isAdmin?"flex":"none";
+  openOverlay("detailOverlay");
+}
+function setMain(el,src){
+  document.getElementById("dm-main-img").src=src;
+  document.querySelectorAll(".g-thumb").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+}
+function closeDetail(){ closeOverlay("detailOverlay"); }
+function closeDetailIfBg(e){ if(e.target===document.getElementById("detailOverlay"))closeDetail(); }
+
+async function deleteCurrentPart(){
+  if(!isAdmin||!currentDetailId||!confirm("¿Eliminar este repuesto permanentemente?"))return;
+  try{
+    if(configured) await db.collection("repuestos").doc(currentDetailId).delete();
+    else parts=parts.filter(p=>p.id!==currentDetailId);
+    closeDetail(); filterParts(); showToast("Repuesto eliminado");
+  }catch(e){ showToast("Error al eliminar"); }
+}
+function editCurrentPart(){
+  const p=parts.find(x=>x.id===currentDetailId); if(!p)return;
+  closeDetail(); openForm(p);
+}
+
+// ?? FORM ??
+function openForm(part){
+  if(!isAdmin){openLogin();return;}
+  editMode=!!part; editId=part?part.id:null;
+  document.getElementById("fm-title").textContent=part?"Editar repuesto":"Nuevo repuesto";
+  document.getElementById("f-name").value=part?part.name:"";
+  document.getElementById("f-part").value=part?part.partNum:"";
+  document.getElementById("f-wh").value=part?part.warehouse:"";
+  document.getElementById("f-cat").value=part?part.category:"";
+  document.getElementById("f-brand").value=part?part.brand:"";
+  document.getElementById("f-compat").value=part?part.compat:"";
+  document.getElementById("f-stock").value=part?part.stock:"";
+  document.getElementById("f-price").value=part?part.price:"";
+  document.getElementById("f-desc").value=part?part.desc:"";
+  document.getElementById("f-specs").value=part?part.specs:"";
+  fPhotos=part&&part.photos?[...part.photos,null,null,null].slice(0,3):[null,null,null];
+  [0,1,2].forEach(updateSlot);
+  openOverlay("formOverlay");
+}
+function closeForm(){ closeOverlay("formOverlay"); }
+function closeFormIfBg(e){ if(e.target===document.getElementById("formOverlay"))closeForm(); }
+
+async function savePart(){
+  if(!isAdmin)return;
+  const name=document.getElementById("f-name").value.trim();
+  const partNum=document.getElementById("f-part").value.trim();
+  if(!name||!partNum){showToast("?? Nombre y N° de parte son obligatorios.");return;}
+  const btn=document.getElementById("btnSave");
+  btn.textContent="Guardando..."; btn.disabled=true;
+  const data={
+    name, partNum,
+    warehouse:document.getElementById("f-wh").value.trim(),
+    category:document.getElementById("f-cat").value.trim()||"General",
+    brand:document.getElementById("f-brand").value.trim()||"—",
+    compat:document.getElementById("f-compat").value.trim(),
+    stock:parseInt(document.getElementById("f-stock").value)||0,
+    price:parseFloat(document.getElementById("f-price").value)||0,
+    desc:document.getElementById("f-desc").value.trim(),
+    specs:document.getElementById("f-specs").value.trim(),
+    photos:fPhotos.filter(Boolean),
+    updatedAt:configured?firebase.firestore.FieldValue.serverTimestamp():new Date().toISOString(),
+  };
+  try{
+    if(configured){
+      if(editMode) await db.collection("repuestos").doc(editId).update(data);
+      else await db.collection("repuestos").add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    }else{
+      if(editMode){const i=parts.findIndex(x=>x.id===editId);parts[i]={id:editId,...data};}
+      else parts.push({id:"local_"+Date.now(),...data});
+      filterParts();
+    }
+    closeForm(); showToast(editMode?"? Repuesto actualizado":"? Repuesto agregado");
+  }catch(e){ showToast("Error al guardar: "+e.message); }
+  btn.textContent="Guardar repuesto"; btn.disabled=false;
+}
+
+// ?? PHOTOS ??
+function pickPhoto(i){ document.getElementById(`fi-${i}`).click(); }
+function loadPhoto(e,i){
+  const file=e.target.files[0]; if(!file)return;
+  if(file.size>2*1024*1024){showToast("?? La foto supera 2MB. Usa una imagen más pequeña.");return;}
+  const r=new FileReader();
+  r.onload=ev=>{fPhotos[i]=ev.target.result;updateSlot(i);};
+  r.readAsDataURL(file);
+}
+function rmPhoto(e,i){ e.stopPropagation(); fPhotos[i]=null; updateSlot(i); document.getElementById(`fi-${i}`).value=""; }
+function updateSlot(i){
+  const img=document.getElementById(`pp-${i}`);
+  if(fPhotos[i]){img.src=fPhotos[i];img.style.display="block";}
+  else{img.style.display="none";}
+}
+
+// ?? OVERLAY ??
+function openOverlay(id){ document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
+function closeOverlay(id){ document.getElementById(id).classList.remove("open"); document.body.style.overflow=""; }
+
+// ?? TOAST ??
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),3000);
+}
+
+// ?? HELP ??
+function openHelp(){ openOverlay("helpOverlay"); }
+function closeHelp(){ closeOverlay("helpOverlay"); }
+
+// ?? MOBILE RESPONSIVE ??
+function checkMob(){
+  const mob=window.innerWidth<=768;
+  const mf=document.getElementById("mobFab");
+  if(mf) mf.style.display=isAdmin&&mob?"flex":"none";
+}
+window.addEventListener("resize",checkMob);
+
+// ?? START ??
+window.addEventListener("load", initFirebase);
+</script>
+</body>
+</html>
