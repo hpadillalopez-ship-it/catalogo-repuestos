@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo de Repuestos</title>
+<title>CatÃ¡logo de Repuestos</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
@@ -209,7 +209,7 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
 <!-- LOADING -->
 <div class="loading-screen" id="loadingScreen">
   <div class="spinner"></div>
-  <div class="loading-text">Cargando catálogo...</div>
+  <div class="loading-text">Cargando catÃ¡logo...</div>
 </div>
 
 <!-- TOAST -->
@@ -217,7 +217,7 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
 
 <!-- CONFIG BANNER (visible until Firebase is configured) -->
 <div class="config-banner" id="configBanner" style="display:none">
-  ?? <strong>Configuración pendiente:</strong> Ingresa tus credenciales de Firebase en el código.
+  ?? <strong>ConfiguraciÃ³n pendiente:</strong> Ingresa tus credenciales de Firebase en el cÃ³digo.
   <a onclick="openHelp()">Ver instrucciones</a>
 </div>
 
@@ -227,13 +227,13 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
     <div class="logo-icon">
       <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
     </div>
-    <span>Catálogo de Repuestos</span>
+    <span>CatÃ¡logo de Repuestos</span>
   </div>
   <div class="topbar-search">
     <span class="search-ico">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </span>
-    <input id="searchInput" type="search" placeholder="Buscar por nombre, N° parte, código almacén..." oninput="filterParts()">
+    <input id="searchInput" type="search" placeholder="Buscar por nombre, NÂ° parte, cÃ³digo almacÃ©n..." oninput="filterParts()">
   </div>
   <div class="topbar-right">
     <span class="admin-badge" id="adminBadge">?? Administrador</span>
@@ -256,15 +256,15 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
       <div class="sidebar-label">Ordenar por</div>
       <select id="sortSelect" onchange="filterParts()">
         <option value="name">Nombre A-Z</option>
-        <option value="part">N° de parte</option>
-        <option value="warehouse">Código almacén</option>
+        <option value="part">NÂ° de parte</option>
+        <option value="warehouse">CÃ³digo almacÃ©n</option>
         <option value="stock-desc">Mayor stock</option>
         <option value="price-asc">Menor precio</option>
         <option value="price-desc">Mayor precio</option>
       </select>
     </div>
     <div>
-      <div class="sidebar-label">Categoría</div>
+      <div class="sidebar-label">CategorÃ­a</div>
       <div class="cat-list" id="catList"></div>
     </div>
   </div>
@@ -299,10 +299,10 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
     </div>
     <div class="info-col">
       <div class="info-card">
-        <div class="info-card-title">Identificación</div>
+        <div class="info-card-title">IdentificaciÃ³n</div>
         <div class="info-rows">
-          <div class="info-row"><span class="info-lbl">N° de parte</span><span class="info-val mono" id="dm-part"></span></div>
-          <div class="info-row"><span class="info-lbl">Código almacén</span><span class="info-val"><span class="wh" id="dm-wh"></span></span></div>
+          <div class="info-row"><span class="info-lbl">NÂ° de parte</span><span class="info-val mono" id="dm-part"></span></div>
+          <div class="info-row"><span class="info-lbl">CÃ³digo almacÃ©n</span><span class="info-val"><span class="wh" id="dm-wh"></span></span></div>
           <div class="info-row"><span class="info-lbl">Marca / Fabricante</span><span class="info-val" id="dm-brand"></span></div>
           <div class="info-row"><span class="info-lbl">Compatibilidad</span><span class="info-val" id="dm-compat"></span></div>
           <div class="info-row"><span class="info-lbl">Stock</span><span class="info-val" id="dm-stock"></span></div>
@@ -310,11 +310,11 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
         </div>
       </div>
       <div class="info-card">
-        <div class="info-card-title">Especificaciones técnicas</div>
+        <div class="info-card-title">Especificaciones tÃ©cnicas</div>
         <div class="specs-grid" id="dm-specs"></div>
       </div>
       <div class="info-card">
-        <div class="info-card-title">Descripción</div>
+        <div class="info-card-title">DescripciÃ³n</div>
         <div class="desc-text" id="dm-desc"></div>
       </div>
     </div>
@@ -337,17 +337,17 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
   <div class="form-body">
     <div class="form-grid">
       <div class="fg"><label>Nombre del repuesto *</label><input id="f-name" placeholder="Ej: Rodamiento de bolas 6205"></div>
-      <div class="fg"><label>N° de parte *</label><input id="f-part" class="mono-input" placeholder="Ej: RB-6205-2RS"></div>
-      <div class="fg"><label>Código almacén</label><input id="f-wh" class="mono-input" placeholder="Ej: ALM-A3-EST2-C4"></div>
-      <div class="fg"><label>Categoría</label><input id="f-cat" placeholder="Ej: Rodamientos, Hidráulica..."></div>
+      <div class="fg"><label>NÂ° de parte *</label><input id="f-part" class="mono-input" placeholder="Ej: RB-6205-2RS"></div>
+      <div class="fg"><label>CÃ³digo almacÃ©n</label><input id="f-wh" class="mono-input" placeholder="Ej: ALM-A3-EST2-C4"></div>
+      <div class="fg"><label>CategorÃ­a</label><input id="f-cat" placeholder="Ej: Rodamientos, HidrÃ¡ulica..."></div>
       <div class="fg"><label>Marca / Fabricante</label><input id="f-brand" placeholder="Ej: SKF, Bosch, Parker..."></div>
       <div class="fg"><label>Compatibilidad</label><input id="f-compat" placeholder="Ej: Torno CNC-450, Fresadora X3"></div>
       <div class="fg"><label>Stock disponible</label><input id="f-stock" type="number" min="0" placeholder="0"></div>
       <div class="fg"><label>Precio unitario (USD)</label><input id="f-price" type="number" min="0" step="0.01" placeholder="0.00"></div>
-      <div class="fg full"><label>Descripción</label><textarea id="f-desc" placeholder="Descripción general, aplicación, notas importantes..."></textarea></div>
-      <div class="fg full"><label>Características técnicas <span style="font-weight:400;color:var(--g400)">(clave: valor, separadas por coma)</span></label><input id="f-specs" placeholder="Ej: Diámetro: 25mm, Material: Acero, Temp. máx: 120°C"></div>
+      <div class="fg full"><label>DescripciÃ³n</label><textarea id="f-desc" placeholder="DescripciÃ³n general, aplicaciÃ³n, notas importantes..."></textarea></div>
+      <div class="fg full"><label>CaracterÃ­sticas tÃ©cnicas <span style="font-weight:400;color:var(--g400)">(clave: valor, separadas por coma)</span></label><input id="f-specs" placeholder="Ej: DiÃ¡metro: 25mm, Material: Acero, Temp. mÃ¡x: 120Â°C"></div>
       <div class="fg full">
-        <label>Fotos <span style="font-weight:400;color:var(--g400)">(máx. 3 — máx. 2MB por foto)</span></label>
+        <label>Fotos <span style="font-weight:400;color:var(--g400)">(mÃ¡x. 3 Â— mÃ¡x. 2MB por foto)</span></label>
         <div class="photo-row">
           <div class="ph-slot" id="ps-0" onclick="pickPhoto(0)"><span class="ph-plus">+</span><span>Foto 1</span><img id="pp-0" style="display:none"><button class="ph-remove" onclick="rmPhoto(event,0)">?</button></div>
           <div class="ph-slot" id="ps-1" onclick="pickPhoto(1)"><span class="ph-plus">+</span><span>Foto 2</span><img id="pp-1" style="display:none"><button class="ph-remove" onclick="rmPhoto(event,1)">?</button></div>
@@ -356,7 +356,7 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
         <input type="file" accept="image/*" id="fi-0" style="display:none" onchange="loadPhoto(event,0)">
         <input type="file" accept="image/*" id="fi-1" style="display:none" onchange="loadPhoto(event,1)">
         <input type="file" accept="image/*" id="fi-2" style="display:none" onchange="loadPhoto(event,2)">
-        <div style="font-size:11px;color:var(--g400);margin-top:6px">Las fotos se guardan automáticamente en la nube.</div>
+        <div style="font-size:11px;color:var(--g400);margin-top:6px">Las fotos se guardan automÃ¡ticamente en la nube.</div>
       </div>
     </div>
   </div>
@@ -372,16 +372,16 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
 <div class="login-box">
   <div style="text-align:center;font-size:36px">??</div>
   <div class="login-title">Acceso Administrador</div>
-  <div class="login-sub">Ingresa tus credenciales para editar el catálogo</div>
+  <div class="login-sub">Ingresa tus credenciales para editar el catÃ¡logo</div>
   <div class="fg">
-    <label>Correo electrónico</label>
+    <label>Correo electrÃ³nico</label>
     <input class="login-input" id="l-email" type="email" placeholder="admin@empresa.com" onkeydown="loginEnter(event)">
   </div>
   <div class="fg">
-    <label>Contraseña</label>
-    <input class="login-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="loginEnter(event)">
+    <label>ContraseÃ±a</label>
+    <input class="login-input" id="l-pass" type="password" placeholder="Â•Â•Â•Â•Â•Â•Â•Â•" onkeydown="loginEnter(event)">
   </div>
-  <div class="login-error" id="login-error">Correo o contraseña incorrectos.</div>
+  <div class="login-error" id="login-error">Correo o contraseÃ±a incorrectos.</div>
   <button class="btn btn-primary" style="justify-content:center;padding:10px" onclick="doLogin()">Ingresar</button>
   <button class="btn" style="justify-content:center" onclick="closeLogin()">Cancelar</button>
 </div>
@@ -391,46 +391,46 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
 <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
 <div class="modal" style="max-width:640px">
   <div class="modal-hdr">
-    <div class="modal-hdr-title">?? Instrucciones de configuración Firebase</div>
+    <div class="modal-hdr-title">?? Instrucciones de configuraciÃ³n Firebase</div>
     <button class="modal-close" onclick="closeHelp()">?</button>
   </div>
   <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;font-size:14px;line-height:1.7">
     <div style="background:var(--blue-lt);border-radius:var(--r-md);padding:1rem;color:var(--blue-dk)">
-      Solo necesitas seguir estos pasos <strong>una única vez</strong>. Toma aproximadamente 10 minutos.
+      Solo necesitas seguir estos pasos <strong>una Ãºnica vez</strong>. Toma aproximadamente 10 minutos.
     </div>
     <div>
-      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 1 — Crear proyecto Firebase</strong>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 1 Â— Crear proyecto Firebase</strong>
       <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
-        <li>Ve a <strong>console.firebase.google.com</strong> e inicia sesión con tu cuenta Google.</li>
+        <li>Ve a <strong>console.firebase.google.com</strong> e inicia sesiÃ³n con tu cuenta Google.</li>
         <li>Haz clic en <strong>"Agregar proyecto"</strong>, ponle un nombre (ej: <em>catalogo-repuestos</em>).</li>
         <li>Desactiva Google Analytics si no lo necesitas. Haz clic en <strong>"Crear proyecto"</strong>.</li>
       </ol>
     </div>
     <div>
-      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 2 — Obtener credenciales</strong>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 2 Â— Obtener credenciales</strong>
       <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
-        <li>En la consola del proyecto, haz clic en el ícono <strong>"&lt;/&gt;"</strong> (Web app).</li>
+        <li>En la consola del proyecto, haz clic en el Ã­cono <strong>"&lt;/&gt;"</strong> (Web app).</li>
         <li>Registra la app con cualquier nombre. NO actives Firebase Hosting.</li>
         <li>Copia el bloque <code style="background:var(--g100);padding:2px 6px;border-radius:4px">firebaseConfig = { ... }</code> que aparece.</li>
-        <li>Abre este archivo HTML en un editor de texto y reemplaza la sección <strong>CONFIGURACIÓN FIREBASE</strong> con tus datos.</li>
+        <li>Abre este archivo HTML en un editor de texto y reemplaza la secciÃ³n <strong>CONFIGURACIÃ“N FIREBASE</strong> con tus datos.</li>
       </ol>
     </div>
     <div>
-      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 3 — Activar Firestore (base de datos)</strong>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 3 Â— Activar Firestore (base de datos)</strong>
       <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
-        <li>En el menú izquierdo ve a <strong>Firestore Database</strong>.</li>
-        <li>Clic en <strong>"Crear base de datos"</strong> ? elige <strong>Modo de producción</strong>.</li>
-        <li>Selecciona la región más cercana (ej: <em>us-central1</em>) y crea.</li>
-        <li>Ve a la pestaña <strong>Reglas</strong> y pega esto: <code style="background:var(--g100);padding:2px 6px;border-radius:4px">allow read: if true; allow write: if request.auth != null;</code></li>
+        <li>En el menÃº izquierdo ve a <strong>Firestore Database</strong>.</li>
+        <li>Clic en <strong>"Crear base de datos"</strong> ? elige <strong>Modo de producciÃ³n</strong>.</li>
+        <li>Selecciona la regiÃ³n mÃ¡s cercana (ej: <em>us-central1</em>) y crea.</li>
+        <li>Ve a la pestaÃ±a <strong>Reglas</strong> y pega esto: <code style="background:var(--g100);padding:2px 6px;border-radius:4px">allow read: if true; allow write: if request.auth != null;</code></li>
       </ol>
     </div>
     <div>
-      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 4 — Crear cuenta de administrador</strong>
+      <strong style="font-size:13px;color:var(--g400);text-transform:uppercase;letter-spacing:.05em">PASO 4 Â— Crear cuenta de administrador</strong>
       <ol style="margin-top:8px;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px">
-        <li>En el menú ve a <strong>Authentication</strong> ? <strong>"Comenzar"</strong>.</li>
-        <li>Activa el proveedor <strong>"Correo electrónico/Contraseña"</strong>.</li>
-        <li>Ve a la pestaña <strong>Usuarios</strong> ? <strong>"Agregar usuario"</strong>.</li>
-        <li>Ingresa el correo y contraseña del administrador. ¡Listo!</li>
+        <li>En el menÃº ve a <strong>Authentication</strong> ? <strong>"Comenzar"</strong>.</li>
+        <li>Activa el proveedor <strong>"Correo electrÃ³nico/ContraseÃ±a"</strong>.</li>
+        <li>Ve a la pestaÃ±a <strong>Usuarios</strong> ? <strong>"Agregar usuario"</strong>.</li>
+        <li>Ingresa el correo y contraseÃ±a del administrador. Â¡Listo!</li>
       </ol>
     </div>
     <div style="background:#EAF3DE;border-radius:var(--r-md);padding:1rem;color:var(--green)">
@@ -443,7 +443,7 @@ body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:
 
 <script>
 // ??????????????????????????????????????????????????????????
-//  ???  CONFIGURACIÓN FIREBASE — REEMPLAZAR CON TUS DATOS ???
+//  ???  CONFIGURACIÃ“N FIREBASE Â— REEMPLAZAR CON TUS DATOS ???
 // ??????????????????????????????????????????????????????????
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -460,14 +460,13 @@ const firebaseConfig = {
   storageBucket: "catalogo-de-repuestos.firebasestorage.app",
   messagingSenderId: "548172487085",
   appId: "1:548172487085:web:516511e75f09e011b8a924",
-  measurementId: "G-8WHBKDK432"
-};
+  };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 // ??????????????????????????????????????????????????????????
-//  ???  FIN DE CONFIGURACIÓN  ???
+//  ???  FIN DE CONFIGURACIÃ“N  ???
 // ??????????????????????????????????????????????????????????
 
 // ?? ESTADO ??
@@ -507,17 +506,17 @@ function listenParts(){
   },err=>{
     console.error(err);
     document.getElementById("loadingScreen").style.display="none";
-    showToast("Error al cargar datos. Verifica la configuración.");
+    showToast("Error al cargar datos. Verifica la configuraciÃ³n.");
   });
 }
 
 function loadDemoData(){
   parts=[
-    {id:"demo1",name:"Rodamiento de bolas 6205",partNum:"RB-6205-2RS",warehouse:"ALM-B2-EST3-C1",category:"Rodamientos",brand:"SKF",compat:"Torno CNC-450, Fresadora FX-3",stock:12,price:18.50,desc:"Rodamiento rígido de bolas con sellos de goma en ambos lados. Alta resistencia a la contaminación y lubricación permanente.",specs:"Diámetro interior: 25mm, Diámetro exterior: 52mm, Ancho: 15mm, Velocidad máx: 13000 rpm",photos:[]},
-    {id:"demo2",name:"Sello hidráulico de pistón 80mm",partNum:"SH-P80-NBR",warehouse:"ALM-A1-EST1-C3",category:"Hidráulica",brand:"Parker",compat:"Cilindro hidráulico H-200",stock:3,price:42.00,desc:"Sello de poliuretano de alta resistencia para pistones hidráulicos.",specs:"Diámetro: 80mm, Material: NBR/PU, Presión máx: 400 bar",photos:[]},
-    {id:"demo3",name:"Correa trapezoidal A-55",partNum:"CT-A55-3V",warehouse:"ALM-C4-EST2-C2",category:"Transmisión",brand:"Gates",compat:"Compresora C-100, Bomba B-220",stock:0,price:8.75,desc:"Correa en V clásica perfil A de alta flexibilidad.",specs:"Perfil: A, Longitud: 1400mm, Ancho: 13mm",photos:[]},
-    {id:"demo4",name:"Válvula solenoide 24VDC ½\"",partNum:"VS-24DC-12-NC",warehouse:"ALM-A2-EST4-C5",category:"Neumática",brand:"SMC",compat:"Sistema neumático P-300",stock:7,price:95.00,desc:"Válvula de control direccional 5/2 normalmente cerrada. Bobina de 24VDC.",specs:"Voltaje: 24VDC, Conexión: ½\", Presión: 0.15-1.0 MPa",photos:[]},
-    {id:"demo5",name:"Filtro de aceite hidráulico 10µm",partNum:"FO-HYD-10-P",warehouse:"ALM-B3-EST1-C8",category:"Filtración",brand:"Hydac",compat:"Unidad hidráulica UH-500",stock:20,price:35.00,desc:"Elemento filtrante de alta eficiencia para aceites hidráulicos.",specs:"Grado: 10µm, Caudal máx: 100 L/min, Presión colapso: 210 bar",photos:[]},
+    {id:"demo1",name:"Rodamiento de bolas 6205",partNum:"RB-6205-2RS",warehouse:"ALM-B2-EST3-C1",category:"Rodamientos",brand:"SKF",compat:"Torno CNC-450, Fresadora FX-3",stock:12,price:18.50,desc:"Rodamiento rÃ­gido de bolas con sellos de goma en ambos lados. Alta resistencia a la contaminaciÃ³n y lubricaciÃ³n permanente.",specs:"DiÃ¡metro interior: 25mm, DiÃ¡metro exterior: 52mm, Ancho: 15mm, Velocidad mÃ¡x: 13000 rpm",photos:[]},
+    {id:"demo2",name:"Sello hidrÃ¡ulico de pistÃ³n 80mm",partNum:"SH-P80-NBR",warehouse:"ALM-A1-EST1-C3",category:"HidrÃ¡ulica",brand:"Parker",compat:"Cilindro hidrÃ¡ulico H-200",stock:3,price:42.00,desc:"Sello de poliuretano de alta resistencia para pistones hidrÃ¡ulicos.",specs:"DiÃ¡metro: 80mm, Material: NBR/PU, PresiÃ³n mÃ¡x: 400 bar",photos:[]},
+    {id:"demo3",name:"Correa trapezoidal A-55",partNum:"CT-A55-3V",warehouse:"ALM-C4-EST2-C2",category:"TransmisiÃ³n",brand:"Gates",compat:"Compresora C-100, Bomba B-220",stock:0,price:8.75,desc:"Correa en V clÃ¡sica perfil A de alta flexibilidad.",specs:"Perfil: A, Longitud: 1400mm, Ancho: 13mm",photos:[]},
+    {id:"demo4",name:"VÃ¡lvula solenoide 24VDC Â½\"",partNum:"VS-24DC-12-NC",warehouse:"ALM-A2-EST4-C5",category:"NeumÃ¡tica",brand:"SMC",compat:"Sistema neumÃ¡tico P-300",stock:7,price:95.00,desc:"VÃ¡lvula de control direccional 5/2 normalmente cerrada. Bobina de 24VDC.",specs:"Voltaje: 24VDC, ConexiÃ³n: Â½\", PresiÃ³n: 0.15-1.0 MPa",photos:[]},
+    {id:"demo5",name:"Filtro de aceite hidrÃ¡ulico 10Âµm",partNum:"FO-HYD-10-P",warehouse:"ALM-B3-EST1-C8",category:"FiltraciÃ³n",brand:"Hydac",compat:"Unidad hidrÃ¡ulica UH-500",stock:20,price:35.00,desc:"Elemento filtrante de alta eficiencia para aceites hidrÃ¡ulicos.",specs:"Grado: 10Âµm, Caudal mÃ¡x: 100 L/min, PresiÃ³n colapso: 210 bar",photos:[]},
   ];
   filterParts();
 }
@@ -548,16 +547,16 @@ async function doLogin(){
   try{
     await auth.signInWithEmailAndPassword(email,pass);
     closeLogin();
-    showToast("? Sesión iniciada correctamente");
+    showToast("? SesiÃ³n iniciada correctamente");
     document.getElementById("l-pass").value="";
   }catch(e){
-    errEl.textContent="Correo o contraseña incorrectos.";
+    errEl.textContent="Correo o contraseÃ±a incorrectos.";
     errEl.style.display="block";
   }
 }
 async function doLogout(){
   await auth.signOut();
-  showToast("Sesión cerrada");
+  showToast("SesiÃ³n cerrada");
 }
 
 // ?? RENDER ??
@@ -608,8 +607,8 @@ function renderGrid(list){
       ${cardImg(p.photos)}
       <div class="card-body">
         <div class="card-header"><div class="card-name">${p.name}</div><span class="part-tag">${p.partNum||""}</span></div>
-        <div class="card-meta"><span class="card-cat">${p.category||""} · ${p.brand||""}</span>${wh}</div>
-        <div class="card-desc">${p.desc||"Sin descripción."}</div>
+        <div class="card-meta"><span class="card-cat">${p.category||""} Â· ${p.brand||""}</span>${wh}</div>
+        <div class="card-desc">${p.desc||"Sin descripciÃ³n."}</div>
         <div class="card-chips">${chips}</div>
         <div class="card-footer"><span class="${st.cls}">${st.label}</span><span class="card-price">$${Number(p.price||0).toFixed(2)}</span></div>
       </div>
@@ -623,17 +622,17 @@ function openDetail(id){
   currentDetailId=id;
   document.getElementById("dm-name").textContent=p.name;
   document.getElementById("dm-cat").textContent=p.category||"";
-  document.getElementById("dm-part").textContent=p.partNum||"—";
-  document.getElementById("dm-wh").textContent=p.warehouse||"—";
-  document.getElementById("dm-brand").textContent=p.brand||"—";
-  document.getElementById("dm-compat").textContent=p.compat||"—";
+  document.getElementById("dm-part").textContent=p.partNum||"Â—";
+  document.getElementById("dm-wh").textContent=p.warehouse||"Â—";
+  document.getElementById("dm-brand").textContent=p.brand||"Â—";
+  document.getElementById("dm-compat").textContent=p.compat||"Â—";
   const st=stockInfo(p.stock||0);
   document.getElementById("dm-stock").innerHTML=`<span class="${st.cls}">${st.label}</span>`;
   document.getElementById("dm-price").textContent=`$${Number(p.price||0).toFixed(2)} USD`;
-  document.getElementById("dm-desc").textContent=p.desc||"Sin descripción.";
+  document.getElementById("dm-desc").textContent=p.desc||"Sin descripciÃ³n.";
   document.getElementById("dm-specs").innerHTML=(p.specs||"").split(",").map(s=>{
     const idx=s.indexOf(":"); const k=idx>=0?s.slice(0,idx).trim():s.trim(); const v=idx>=0?s.slice(idx+1).trim():"";
-    return`<div class="spec-box"><div class="spec-box-lbl">${k}</div><div class="spec-box-val">${v||"—"}</div></div>`;
+    return`<div class="spec-box"><div class="spec-box-lbl">${k}</div><div class="spec-box-val">${v||"Â—"}</div></div>`;
   }).join("");
   const vp=(p.photos||[]).filter(Boolean);
   const mi=document.getElementById("dm-main-img"),mph=document.getElementById("dm-ph");
@@ -653,7 +652,7 @@ function closeDetail(){ closeOverlay("detailOverlay"); }
 function closeDetailIfBg(e){ if(e.target===document.getElementById("detailOverlay"))closeDetail(); }
 
 async function deleteCurrentPart(){
-  if(!isAdmin||!currentDetailId||!confirm("¿Eliminar este repuesto permanentemente?"))return;
+  if(!isAdmin||!currentDetailId||!confirm("Â¿Eliminar este repuesto permanentemente?"))return;
   try{
     if(configured) await db.collection("repuestos").doc(currentDetailId).delete();
     else parts=parts.filter(p=>p.id!==currentDetailId);
@@ -691,14 +690,14 @@ async function savePart(){
   if(!isAdmin)return;
   const name=document.getElementById("f-name").value.trim();
   const partNum=document.getElementById("f-part").value.trim();
-  if(!name||!partNum){showToast("?? Nombre y N° de parte son obligatorios.");return;}
+  if(!name||!partNum){showToast("?? Nombre y NÂ° de parte son obligatorios.");return;}
   const btn=document.getElementById("btnSave");
   btn.textContent="Guardando..."; btn.disabled=true;
   const data={
     name, partNum,
     warehouse:document.getElementById("f-wh").value.trim(),
     category:document.getElementById("f-cat").value.trim()||"General",
-    brand:document.getElementById("f-brand").value.trim()||"—",
+    brand:document.getElementById("f-brand").value.trim()||"Â—",
     compat:document.getElementById("f-compat").value.trim(),
     stock:parseInt(document.getElementById("f-stock").value)||0,
     price:parseFloat(document.getElementById("f-price").value)||0,
@@ -725,7 +724,7 @@ async function savePart(){
 function pickPhoto(i){ document.getElementById(`fi-${i}`).click(); }
 function loadPhoto(e,i){
   const file=e.target.files[0]; if(!file)return;
-  if(file.size>2*1024*1024){showToast("?? La foto supera 2MB. Usa una imagen más pequeña.");return;}
+  if(file.size>2*1024*1024){showToast("?? La foto supera 2MB. Usa una imagen mÃ¡s pequeÃ±a.");return;}
   const r=new FileReader();
   r.onload=ev=>{fPhotos[i]=ev.target.result;updateSlot(i);};
   r.readAsDataURL(file);
